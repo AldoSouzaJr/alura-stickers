@@ -14,32 +14,31 @@ public class App {
 
 		// fazer uma conexão HTTP e buscar os top 250 filmes
 		
-		String url = "https://imdb-api.com/en/API/Top250Movies/k_9pgylnim";
-		URI endereco = URI.create(url);
-		var client = HttpClient.newHttpClient();
-		var request = HttpRequest.newBuilder(endereco).GET().build();
-		HttpResponse<String> response = client.send(request, BodyHandlers.ofString());
-		String body = response.body();
+		//String url = "https://imdb-api.com/en/API/Top250Movies/k_9pgylnim";
+		//ExtratorDeConteudo extrator = new ExtratorDeConteudoDoIMDB();
 
-		// extrair só os dados que interessam (titulo, poster, classificação)
+		String url = "https://api.mocki.io/v2/549a5d8b/NASA-APOD";
+		ExtratorDeConteudo extrator = new ExtratorDeConteudoDaNasa(); 
 		
-		var parser = new JsonParser();
-		List<Map<String, String>> listaDeFilmes = parser.parse(body);
-
+		var http = new ClienteHttp();
+		String json = http.buscaDados(url);
+		
 		// exibindo e manipulando os dados
+		List<Conteudo> conteudos = extrator.extraiConteudo(json);
+		
 		
 		var geradora = new GeradoraDeFigurinhas();
-		for (Map<String, String> filme : listaDeFilmes) {
-			
-			String urlImagem = filme.get("image");
-			String titulo = filme.get("title");
-			
-			InputStream inputStream = new URL(urlImagem).openStream();
-			String nomeArquivo = titulo + ".png";
+		
+		for (int i = 0; i < 3; i++) {
+		
+		Conteudo conteudo = conteudos.get(i);
+					
+			InputStream inputStream = new URL(conteudo.getUrlImagem()).openStream();
+			String nomeArquivo = "saida/" + conteudo.getTitulo().replace(":", "-") + ".png";
 			
 			geradora.cria(inputStream, nomeArquivo);
 		
-			System.out.println(titulo);
+			System.out.println(conteudo.getTitulo());
 			System.out.println();
 		}
 	}
